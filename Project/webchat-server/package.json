@@ -1,0 +1,32 @@
+{
+    "name": "webchat-server",
+    "version": "1.0.0",
+    "description": "A Simple WebChat System",
+    "main": "index.js",
+    "scripts": {
+      "test": "node index.js",
+      "start": "node index.js"
+    },
+    "repository": {
+      "type": "git",
+      "url": "git+https://bitbucket.org/cca-pphung1/cca-pphung1.git"
+    },
+    "keywords": [
+      "Express",
+      "Node.js"
+    ],
+    "author": "Phu Phung",
+    "license": "ISC",
+    "homepage": "https://bitbucket.org/cca-pphung1/cca-pphung1#readme",
+    "dependencies": {
+      "cores": "^0.8.5",
+      "cors": "^2.8.5",
+      "express": "^4.17.1",
+      "http-server": "^0.12.3",
+      "mongodb": "^4.0.0",
+      "socket.io": "^2.4.1",
+      "socketio": "^1.0.0",
+      "superagent": "^6.1.0"
+    }
+  }
+  

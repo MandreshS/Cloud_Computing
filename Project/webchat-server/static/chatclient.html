@@ -1,0 +1,236 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>CCA-Test page of Mandresh Sundararajan</title>
+  <style>
+    #chat-sidebar {
+        width: 200px;
+        position: fixed;
+        height: 100%;
+        padding-top: 5px;
+        padding-bottom: 10px;
+        border-radius: 5px;
+        background: rgba(253, 255, 253, 0.95);
+        box-shadow: 0 2px 5px 0 rgba(21, 252, 0, 0.959);}
+
+    #top {text-align: center;}
+    #login{text-align: center;}
+    #register{text-align: center;}
+    #container-wrapper{font-family: inherit;}
+    #signin{align-content: center;
+          text-align: center;}
+    #signup{align-content: center;
+          text-align: center;}
+    #chat{align-content: center;
+          text-align: center;}
+    .message{text-align: center;}
+    a{color: azure;}
+      
+    .button {
+      background-color: #3ae374;
+      border: none;
+      color: white;
+      padding: 8px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 12px;
+      margin: 10px 2px;
+      cursor: pointer;}
+      
+    .round {border-radius: 8px;}
+    #response {background-color: #fff200;}
+    #signup{display: none;}
+    #chat{display:none;} 
+  </style>
+    
+     <link rel="stylesheet" href="https://udayton-cloud.bitbucket.io/style1.css">
+    <script src="https://udayton-cloud.bitbucket.io/clock.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js" crossorigin="anonymous"></script>
+    <script src="/socket.io/socket.io.js"></script> 
+    
+    <script> 
+
+    var socketio = io();
+    function send(){
+    var input = $("#data").val();
+    if (input.length==0)
+    return;
+        
+    //message, online and responses. 
+    socketio.emit("message", input);
+    console.log("Data sent to server: " +input);
+     $("#data").val("");
+    }
+    socketio.on("message", (data) => {
+        $("#response").append(data + "<br>");
+    });
+    socketio.on("typing", function(data){
+    $("#typing").html(data);
+        setTimeout(()=>{$("#typing").html("<br>")},1000);
+    });
+    socketio.on("online", (data) =>{
+    $("#online").html(data + "<br>")
+});
+    
+    function checkEnter(event){
+       if(event.keyCode == 13)  
+       {
+           send();
+        event.preventDefault();
+    }
+ } 
+
+ function logout(){
+              //  socketio.emit("logout",username);
+                location.reload();
+            }
+
+//Login Function        
+function login(){
+    var username=$("#username").val();
+    var password=$("#password").val();
+    if(username.length<1 || password.length<1){
+        alert("Please Re enter your username/password");
+        return;
+    }
+         socketio.emit("login", username, password)
+     }
+        socketio.on("authenticated", (data) => {
+            $('#signin').hide()
+
+            $('#chat').show()
+        alert(data)
+    });
+        socketio.on("loginfailed", (data) => {
+        alert(data)
+    });
+
+//Register function
+ function register(){
+     var username=$("#username2").val();
+     var fullname=$("#fullname").val();
+     var password=$("#password2").val();
+     var emailaddress=$("#emailaddress").val();
+        if(username.length<1 ||fullname.length<1 || password.length<1 || emailaddress.length<1){
+        alert("Please Re-enter or check the details you have entered");
+        return;
+    }
+var account={username:username,password:password,fullname:fullname,email:email};
+     socketio.emit("register", account)
+}
+     socketio.on("registered", (data) => {
+        alert(data)
+    });
+     socketio.on("notregistered", (data) => {
+        alert(data)    
+    });
+
+    //chat-sidebar
+if ($("#chat-sidebar").length == 0) {
+                $("#" + currentUserListPositionID).append('Onlineusers: <div id="chat-sidebar">');
+            }
+
+            function renderUserList() {
+                $("#chat-sidebar").empty();
+                if(!ActiveUserList || ActiveUserList.length == 0 || !ActiveUserList[0].username){
+                    chatboxAlert('Developers: You must provide a userlist in a JSON array of: [{username:"", fullname:"",avatar:""},...]');
+                    return;
+                }
+                ActiveUserList = ActiveUserList.filter((elem, index, self) => self.findIndex(
+                        (t) => {return (t.username === elem.username)}) === index)
+                if(!ActiveUserList || ActiveUserList.length == 1){   
+                    $("#chat-sidebar").append('<span>You are the only online user</span>');
+                    return;
+                }
+                for (var idx in ActiveUserList) {
+                    const user = ActiveUserList[idx];
+                    console.log("inside create side bar",user) 
+                    if(user.username && user.username != username){
+                        console.log("inside create side bar 2")
+                        const avatar = user.avatar || 'https://i.pravatar.cc/150?u='+user.username;
+                        const fullname = user.fullname || user.username;
+                        const newusr = '<div id="sidebar-user-box" class="' + user.username + '">' +
+                        '<img class="user-avatar" id="avatar_'+user.username+'" src="' + avatar  + '" />' +
+                        '<span id="' + user.username + '"">' + fullname + '</span>' +
+                        '</div> '
+                        $("#chat-sidebar").append(newusr);
+                    } 
+                }
+            }
+
+
+</script>
+</head>
+    
+<body> <!--bgcolor=#2d3436-->
+ <div class="container-wrapper">
+        <div id="top">
+        <h1>Cloud Computing and Applications - Webchat system with Authentication</h1>
+            <h2>By Mandresh Sundararajan</h2>
+            <div id="email" onclick="showhideEmail()"> Reveal my Email here</div>
+            <script src ="email.js"></script>
+        </div>
+    </div>
+    
+    <div class="wrapper">
+        <div id ="menubar">
+        <canvas id="analog-clock" width="150" height="150" style="background-color:#999"></canvas>
+    <div id="chat-sidebar">
+    </div>
+    
+      <script>
+        var canvas = document.getElementById("analog-clock");
+        var ctx = canvas.getContext("2d");
+        var radius = canvas.height / 2;
+        ctx.translate(radius, radius);
+        radius = radius * 0.90
+        setInterval(drawClock, 1000);
+
+        function drawClock() 
+        {
+            drawFace(ctx, radius);
+            drawNumbers(ctx, radius);
+            drawTime(ctx, radius);
+        }
+    </script>
+    </div>
+
+<div id="main">
+<div id="signin">
+
+<form class ="loginform">
+<input placeholder="Your Username" required id="username" type="text"><br>
+<input placeholder="Password" required id="password" type="password"><br>
+<div class="button round" onclick="login()">login</div>
+<p class="message">Not registered? <a href="#" onclick="$('#signin').hide();$('#signup').show()">Create an Account to start chatting...</a></p>
+</form>
+</div>
+
+<div id="signup">
+<form class="registerform">
+<input placeholder="Full name" id="fullname" type="text"><br>
+<input placeholder="Username" id="username2" type="text"><br>
+<input placeholder="Email address" id="emailaddress" type="text"><br>
+<input placeholder="Password" id="password2" type="text"><br>
+<div class="button round" onclick="register()">create</div><br>
+<p class="message">Already registered? <a href="#" onclick="$('#signin').show();$('#signup').hide()">Sign In here..</a></p>
+</form>
+</div>
+
+ <div id="chat">
+     <div id="mydiv">
+     Chat message:<input name="data" onkeypress="checkEnter(event)" 
+   onkeyup="socketio.emit('typing')" id="data">
+<input class="button round" type="button" value="Send" onclick="send()">
+<input class="button round" type="button" value="logout" onclick ="logout()">
+<div id="typing"></div>
+ <div id="online"></div>
+<div id="response"></div>
+ </div>
+        </div>
+    </div>
+    </div>
+</body>
+</html>

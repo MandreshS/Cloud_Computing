@@ -1,0 +1,187 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>CCA-Test page of Mandresh Sundararajan</title>
+  <style>
+      
+    #top {text-align: center;}
+    #login{text-align: center;}
+    #register{text-align: center;}
+    #container-wrapper{font-family: inherit;}
+    #chat{align-content: center;
+          text-align: center;}
+      
+    .button {
+      background-color: #3ae374;
+      border: none;
+      color: white;
+      padding: 8px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 12px;
+      margin: 10px 2px;
+      cursor: pointer;}
+      
+    .round {border-radius: 8px;}
+    #response {background-color: #fff200;}
+    #signup{display: none;}
+    #chat{display:none;} 
+  </style>
+    
+     <link rel="stylesheet" href="https://udayton-cloud.bitbucket.io/style1.css">
+    <script src="https://udayton-cloud.bitbucket.io/clock.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js" crossorigin="anonymous"></script>
+    <script src="/socket.io/socket.io.js"></script> 
+    
+    <script> 
+
+    var socketio = io();
+    function send(){
+    var input = $("#data").val();
+    if (input.length==0)
+    return;
+    socketio.emit("message", input);
+    console.log("Data sent to server: " +input);
+     $("#data").val("");
+    }
+    socketio.on("message", (data) => {
+        $("#response").append(data + "<br>");
+    });
+    socketio.on("typing", function(data){
+    $("#typing").html(data);
+   setTimeout(()=>{$("#typing").html("<br>")},500);
+    });
+socketio.on("online", (data) =>{
+    $("#online").html(data + "<br>")
+});
+    
+    function checkEnter(event){
+       if(event.keyCode == 13)  
+       {
+           send();
+    event.preventDefault();
+    }
+ } 
+ function register(){
+     var username=$("#newusername").val();
+     var fullname=$("#fullname").val();
+     var password=$("#newpassword").val();
+    var email=$("#emailaddress").val();
+    if(username.length<1 || password.length<1){
+        alert("Please Re enter your username/password");
+        return;
+    }
+var account={username:username,password:password,fullname:fullname,email:email};
+socketio.emit("register", account)
+}
+socketio.on("registered", (data) => {
+        alert(data)
+    });
+socketio.on("not-registered", (data) => {
+        alert(data)    
+    });
+
+      
+     function login(){
+     var username=$("#username").val();
+     var password=$("#password").val();
+    if(username.length<1 || password.length<1){
+        alert("Please Re enter your username/password");
+        return;
+    }
+socketio.emit("login", username, password)
+}
+socketio.on("authenticated", (data) => {
+    $('#signin').hide()
+
+    $('#chat').show()
+        alert(data)
+    });
+socketio.on("login-failed", (data) => {
+        alert(data)
+       
+    });
+
+</script>
+</head>
+    
+<body>
+ <div class="container-wrapper">
+        <div id="top">
+        <h1>Cloud Computing and Applications - Webchat system with Authentication</h1>
+            <h2>By Mandresh Sundararajan</h2>
+            <div id="email" onclick="showhideEmail()"> Reveal my Email here</div>
+            <script src ="email.js"></script>
+        </div>
+    </div>
+    
+    <div class="wrapper">
+        <div id ="menubar">
+        <canvas id="analog-clock" width="150" height="150" style="background-color:#999"></canvas>
+    
+    
+      <script>
+        var canvas = document.getElementById("analog-clock");
+        var ctx = canvas.getContext("2d");
+        var radius = canvas.height / 2;
+        ctx.translate(radius, radius);
+        radius = radius * 0.90
+        setInterval(drawClock, 1000);
+
+        function drawClock() 
+        {
+            drawFace(ctx, radius);
+            drawNumbers(ctx, radius);
+            drawTime(ctx, radius);
+        }
+    </script>
+    </div>
+
+<div id="main">
+<div id="signin">
+
+<form class ="loginform">
+<input type="text" placeholder="Your Username" required id="username"/><br>
+<input type="password" placeholder="Password" required id="password"/><br>
+<div class="button round" onclick="login()">login</div>
+<p class="message">Not registered? <a href="#" onclick="$('#signin').hide();$('#signup').show()">Create an Account to start chatting...</a></p>
+</form>
+</div>
+
+<div id="signup">
+<form class="registerform">
+<input type="text" placeholder="Full name" id="fullname"/><br>
+<input type="text" placeholder="Username" id="newusername"/><br>
+<input type="text" placeholder="Email address" id="emailaddress"/><br>
+<input type="password" placeholder="Password" id="newpassword"/><br>
+<div class="button round" onclick="register()">create</div><br>
+<p class="message">Already registered? <a href="#" onclick="$('#signin').show();$('#signup').hide()">Sign In here..</a></p>
+</form>
+</div>
+
+
+
+<script>
+function displayTime() {
+document.getElementById('digit-clock').innerHTML = 'Current Time: ' + new Date();
+}
+setInterval(displayTime, 500);
+</script>
+
+ <div id="chat">
+     <div id="mydiv"
+onclick="document.getElementById('mydiv').innerHTML= 'Clicked time: '+ Date()">Click here for current time</div>
+<div id="digit-clock"></div>
+     Chat message:<input name="data" onkeypress="checkEnter(event)" 
+   onkeyup="socketio.emit('typing')" id="data">
+<input class="button round" type="button" value="Send" onclick="send()">
+<div id="typing"></div>
+ <div id="online"></div>
+<div id="response"></div>
+ </div>
+        </div>
+    </div>
+</body>
+</html>
